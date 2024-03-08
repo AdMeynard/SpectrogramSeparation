@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import scipy.signal as scisig
 import Estimation_algorithm
 import random
+from sklearn.decomposition import NMF
 
 plt.close('all')
 
@@ -57,18 +58,29 @@ plt.xlabel('Time (s)')
 plt.ylabel('Frequency (Hz)')
 plt.ylim((0,5000))
 
-#%% My algo
+#%% Spectrogram Separation
 
 Sz = np.abs(sTF)**2
 K = 300
+Theta = 0.001
 alpha = 10
 beta  = 0.000001
 gamma  = 0.15
 Niter  = 10
 
-Sx,Sy,L = Estimation_algorithm.SpectrogramSeparation(Sz,K,alpha,beta,gamma,Niter)
+Sx,Sy,L,k = Estimation_algorithm.SpectrogramSeparation(Sz,K,Theta,alpha,beta,gamma,Niter)
 
 residual = Sz-(Sx+Sy)
+
+#%% NMF
+
+model = NMF(n_components=2, tol=5e-3)
+
+cols = model.fit_transform(Sz)
+rows = model.components_
+
+Sx_est = np.outer(cols[:,0], rows[0,:])
+Sy_est = np.outer(cols[:,1], rows[1,:])
 
 #%% Plot figures
 save_fig = 'figures'
@@ -122,4 +134,26 @@ plt.xlabel('Time (s)')
 plt.ylabel('Frequency (Hz)')
 
 save_path1 = os.path.join(save_fig, "Residuals.pdf")
+plt.savefig(save_path1, bbox_inches='tight')
+
+plt.figure(figsize=(30,10))
+plt.pcolormesh(tTF[::3],fTF[::3],Sx_est[::3,::3])
+plt.ylim((0,5000))
+plt.colorbar()
+plt.xlabel('Time (s)')
+plt.ylabel('Frequency (Hz)')
+plt.tight_layout()
+
+save_path1 = os.path.join(save_fig, "Spectrogram_x_nmf.pdf")
+plt.savefig(save_path1, bbox_inches='tight')
+
+plt.figure(figsize=(30,10))
+plt.pcolormesh(tTF[::3],fTF[::3],Sy_est[::3,::3])
+plt.ylim((0,5000))
+plt.colorbar()
+plt.xlabel('Time (s)')
+plt.ylabel('Frequency (Hz)')
+plt.tight_layout()
+
+save_path1 = os.path.join(save_fig, "Spectrogram_y_nmf.pdf")
 plt.savefig(save_path1, bbox_inches='tight')

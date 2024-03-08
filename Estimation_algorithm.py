@@ -3,7 +3,7 @@ import scipy.linalg as scilin
 
 
 
-def SpectrogramSeparation(Sz,K,alpha,beta,gamma,Niter):
+def SpectrogramSeparation(Sz,K,Theta,alpha,beta,gamma,Niter):
     
     N,M  = np.shape(Sz)
     
@@ -17,13 +17,21 @@ def SpectrogramSeparation(Sz,K,alpha,beta,gamma,Niter):
     
     Sy = np.zeros((N,M))
     L = np.zeros(K)
-    for k  in range(K):  
+    k=0
+    criterion = np.inf
+    Lprec = 0
+    while k<K and criterion>Theta:  
         Sx = np.linalg.solve(Mat, Sz-Sy)      
         Sy = solveSy(Sz-Sx,gamma,Niter,Sy,beta)
         
         L[k] = costFunction(Sz,Sx,Sy,alpha,beta,B)
+        if k>0:
+            criterion = (Lprec-L[k])/Lprec
+        Lprec = L[k]
+        
+        k = k+1
     
-    return  Sx,Sy,L
+    return  Sx,Sy,L,k
 
 
 def solveSy(S,gamma,Niter,x,beta):
