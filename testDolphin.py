@@ -79,12 +79,13 @@ fTF = fTF[freqband]
 
 Sz = np.log1p(np.abs(sTF[freqband,:]))
 K = 500
+Theta = 0.001
 alpha = 0.1 # 0.8
 beta  = 0.00001 # 0.0001
 gamma  = 0.15
 Niter  = 10
 
-Sx,Sy,L = Estimation_algorithm.SpectrogramSeparation(Sz,K,alpha,beta,gamma,Niter)
+Sx,Sy,L,k = Estimation_algorithm.SpectrogramSeparation(Sz,K,Theta,alpha,beta,gamma,Niter)
 
 #%% Figures
 

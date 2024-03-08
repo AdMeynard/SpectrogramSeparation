@@ -71,6 +71,7 @@ Niter  = 10
 Sx,Sy,L,k = Estimation_algorithm.SpectrogramSeparation(Sz,K,Theta,alpha,beta,gamma,Niter)
 
 residual = Sz-(Sx+Sy)
+error_1 = np.linalg.norm(Sz-Sx-Sy)
 
 #%% NMF
 
@@ -81,6 +82,8 @@ rows = model.components_
 
 Sx_est = np.outer(cols[:,0], rows[0,:])
 Sy_est = np.outer(cols[:,1], rows[1,:])
+
+error_2 = np.linalg.norm(Sz-cols@rows)
 
 #%% Plot figures
 save_fig = 'figures'
