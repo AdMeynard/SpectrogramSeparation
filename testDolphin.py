@@ -25,6 +25,7 @@ import matplotlib.pyplot as plt
 from scipy.io import wavfile
 import scipy.signal as scisig
 import Estimation_algorithm
+from sklearn.decomposition import NMF
 
 plt.close('all')
 plt.rcParams.update({'font.size': 28})
@@ -87,6 +88,18 @@ Niter  = 10
 
 Sx,Sy,L,k = Estimation_algorithm.SpectrogramSeparation(Sz,K,Theta,alpha,beta,gamma,Niter)
 
+#%% NMF
+
+model = NMF(n_components=2)
+
+cols = model.fit_transform(Sz)
+rows = model.components_
+
+Sx_est = np.outer(cols[:,0], rows[0,:])
+Sy_est = np.outer(cols[:,1], rows[1,:])
+
+error_2 = np.linalg.norm(Sz-cols@rows)
+
 #%% Figures
 
 save_fig = 'figures'
@@ -101,8 +114,8 @@ plt.tight_layout()
 save_path1 = os.path.join(save_fig, "Spectrogram_dolphin.pdf")
 plt.savefig(save_path1, bbox_inches='tight')
 
-plt.figure(figsize=(30,10))
-plt.pcolormesh(tTF[::3],fTF[::3],Sx[::3,::3])
+plt.figure(figsize=(30,20))
+plt.pcolormesh(tTF[::8],fTF[::3],Sx[::3,::8])
 plt.colorbar()
 plt.xlabel('Time (s)')
 plt.ylabel('Frequency (Hz)')
@@ -111,12 +124,32 @@ plt.tight_layout()
 save_path1 = os.path.join(save_fig, "Spectrogram_x_dolphin.pdf")
 plt.savefig(save_path1, bbox_inches='tight')
 
-plt.figure(figsize=(30,10))
-plt.pcolormesh(tTF[::3],fTF[::3],Sy[::3,::3])
+plt.figure(figsize=(30,20))
+plt.pcolormesh(tTF[::8],fTF[::3],Sy[::3,::8])
 plt.colorbar()
 plt.xlabel('Time (s)')
 plt.ylabel('Frequency (Hz)')
 plt.tight_layout()
 
 save_path1 = os.path.join(save_fig, "Spectrogram_y_dolphin.pdf")
+plt.savefig(save_path1, bbox_inches='tight')
+
+plt.figure(figsize=(30,10))
+plt.pcolormesh(tTF[::8],fTF[::3],Sx_est[::3,::8])
+plt.colorbar()
+plt.xlabel('Time (s)')
+plt.ylabel('Frequency (Hz)')
+plt.tight_layout()
+
+save_path1 = os.path.join(save_fig, "Spectrogram_x_dolphin_nmf.pdf")
+plt.savefig(save_path1, bbox_inches='tight')
+
+plt.figure(figsize=(30,10))
+plt.pcolormesh(tTF[::8],fTF[::3],Sy_est[::3,::8])
+plt.colorbar()
+plt.xlabel('Time (s)')
+plt.ylabel('Frequency (Hz)')
+plt.tight_layout()
+
+save_path1 = os.path.join(save_fig, "Spectrogram_y_dolphin_nmf.pdf")
 plt.savefig(save_path1, bbox_inches='tight')
